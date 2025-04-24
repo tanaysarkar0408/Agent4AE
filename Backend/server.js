@@ -1,0 +1,90 @@
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require("dotenv").config();
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+const PORT = process.env.PORT || 3000;
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash"
+    // systemInstruction : {
+    //     role: 'system',
+    //   parts: [{"text": `You are an expert in Adobe After Effects scripting. Only return JavaScript ExtendScript code. Do not explain anything, just return the script.`}]
+    // }
+});
+
+ app.post("/convert", async (req, res) => {
+    const { prompt } = req.body;
+  
+    try {
+      // 🔸 Use system prompt here:
+      const chat = model.startChat({
+        history: [],
+        systemInstruction : {
+            role: 'system',
+          parts: [{"text": `You are an expert in Adobe After Effects scripting. Generate only valid JavaScript ExtendScript code for 
+            After Effects, wrapped in an immediately invoked function expression (function() { ... })();. 
+            Do not include explanations, comments, markdown, or code fences (e.g., \`\`\`javascript).
+             Ensure the script is concise, functional, and checks for active composition (e.g., if (app.project.activeItem == null) 
+             { alert("No active composition"); return; }).
+             Target the selected layer or a specified layer by name/index, checking if a layer exists. Examples:
+             - "Create a null layer and make it parent of 8th layer": (function() { if (app.project.activeItem == null || !(app.project.activeItem instanceof CompItem)) { alert("No active composition"); return; } var comp = app.project.activeItem; if (comp.numLayers < 8) { alert("Composition must have at least 8 layers"); return; } var nullLayer = comp.layers.addNull(); var eighthLayer = comp.layer(8); eighthLayer.parent = nullLayer; })();
+            - "Create a red solid layer named Background": (function() { if (app.project.activeItem == null) { alert("No active composition"); return; } app.project.activeItem.layers.addSolid([1,0,0], "Background", 1920, 1080, 1); })();
+            - "Create an adjustment layer": (function() { if (app.project.activeItem == null) { alert("No active composition"); return; } var adjLayer = app.project.activeItem.layers.addSolid([1,1,1], "Adjustment Layer", app.project.activeItem.width, app.project.activeItem.height, 1); adjLayer.adjustmentLayer = true; })();
+              For precompose commands, pass an array of layer indices (integers, e.g., [1, 2, 3]) to layers.precompose. 
+              For adjustment layers, create a solid layer with addSolid and set adjustmentLayer = true.
+              For adding effects, use layer.Effects.addProperty with the effect's internal name 
+              (e.g., "ADBE Gaussian Blur 2" for Gaussian Blur). 
+              For applying user presets, use layer.applyPreset with a File object. 
+              Presets may be in:
+              - User Presets: "C:/Users/acer/Documents/Adobe/After Effects 2023/User Presets/" with subfolders (e.g., Zireael/, MyPresets/CCs/).
+              - Default Presets: "C:/Program Files/Adobe/Adobe After Effects 2023/Support Files/Presets/" with subfolders (e.g., Trapcode Tao/).
+              Use the exact preset name from the prompt, preserving spaces and capitalization, and append .ffx only if not included. Check if the preset file exists before applying. Target the selected layer, a named layer, or a newly created layer as specified. Map common effect names to internal names:
+              - Blur, Gaussian Blur: ADBE Gaussian Blur 2
+              - Drop Shadow: ADBE Drop Shadow
+              - Hue/Saturation: ADBE Hue Saturation
+              Examples:
+              - "Create a red solid layer named Background": (function() { if (app.project.activeItem == null) { alert("No active composition"); return; } app.project.activeItem.layers.addSolid([1,0,0], "Background", 1920, 1080, 1); })();
+              - "Add a Gaussian Blur effect to the selected layer": (function() { if (app.project.activeItem == null || !(app.project.activeItem instanceof CompItem)) { alert("No active composition"); return; } if (app.project.activeItem.selectedLayers.length == 0) { alert("No layer selected"); return; } var layer = app.project.activeItem.selectedLayers[0]; layer.Effects.addProperty("ADBE Gaussian Blur 2"); layer.Effects.property("ADBE Gaussian Blur 2").property("Blurriness").setValue(20); })();
+              - "Add an Adjustment Layer with name CC1. Add a preset Zireael CC Quality to it": (function() { if (app.project.activeItem == null || !(app.project.activeItem instanceof CompItem)) { alert("No active composition"); return; } var adjLayer = app.project.activeItem.layers.addSolid([1,1,1], "CC1", app.project.activeItem.width, app.project.activeItem.height, 1); adjLayer.adjustmentLayer = true; var presetFile = new File("C:/Users/acer/Documents/Adobe/After Effects 2023/User Presets/Zireael/Zireael CC Quality.ffx"); if (!presetFile.exists) { alert("Preset file not found"); return; } adjLayer.applyPreset(presetFile); })();
+              - "Apply preset MyPresets/CCs/My Preset to the selected layer": (function() { if (app.project.activeItem == null || !(app.project.activeItem instanceof CompItem)) { alert("No active composition"); return; } if (app.project.activeItem.selectedLayers.length == 0) { alert("No layer selected"); return; } var layer = app.project.activeItem.selectedLayers[0]; var presetFile = new File("C:/Users/acer/Documents/Adobe/After Effects 2023/User Presets/MyPresets/CCs/My Preset.ffx"); if (!presetFile.exists) { alert("Preset file not found"); return; } layer.applyPreset(presetFile); })();
+              - "Apply preset Trapcode Tao/Tao Effect to layer named Background": (function() { if (app.project.activeItem == null || !(app.project.activeItem instanceof CompItem)) { alert("No active composition"); return; } var layer = null; for (var i = 1; i <= app.project.activeItem.numLayers; i++) { if (app.project.activeItem.layer(i).name == "Background") { layer = app.project.activeItem.layer(i); break; } } if (layer == null) { alert("Layer 'Background' not found"); return; } var presetFile = new File("C:/Program Files/Adobe/Adobe After Effects 2023/Support Files/Presets/Trapcode Tao/Tao Effect.ffx"); if (!presetFile.exists) { alert("Preset file not found"); return; } layer.applyPreset(presetFile); })();
+`}]
+        }
+        // system_instruction : [
+        //     types.Part.from_text(text="You are an After Effects script generator. You will be given a prompt and you will generate a script that can be run in After Effects. The script should be in JavaScript and should not contain any comments or explanations. The script should be valid and should not contain any errors. The script should be as short as possible while still being valid and functional.")
+        // ],
+      });
+  
+      const result = await chat.sendMessage(prompt);
+      let script = await result.response.text();
+
+      console.log("Raw Gemini response:", script); // Debug: log raw response
+
+      
+
+      // Clean script: remove markdown, code fences, or extra text
+    script = script
+    .replace(/```javascript\n|```/g, "")
+      .replace(/\/\/.*?\n/g, "")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .trim();
+
+      console.log("Cleaned script:", script);
+     // Basic validation: ensure script contains After Effects commands
+     if (!script.includes("app.") || script.length < 10) {
+      return res.status(400).json({ error: "Invalid script generated" });
+    }
+  
+      res.json({ script });
+    } catch (err) {
+      console.error("❌ Gemini API Error:", err);
+      res.status(500).json({ error: err.message ||  "Failed to generate script" });
+    }
+  });
+app.listen(PORT, () => console.log(`🚀 Server running on ${PORT}`));

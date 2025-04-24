@@ -14,7 +14,6 @@ dist-ssr
 .env
 package.json
 package-lock.json
-server.js
 src
 
 # Editor directories and files
