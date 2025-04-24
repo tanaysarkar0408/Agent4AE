@@ -5,7 +5,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: '*', methods: ['POST'], allowedHeaders: ['Content-Type', 'Origin', 'Accept'] }));
 app.use(bodyParser.json());
 const PORT = process.env.PORT || 3000;
 
@@ -19,21 +19,31 @@ const model = genAI.getGenerativeModel({
 });
 
  app.post("/convert", async (req, res) => {
-    const { prompt } = req.body;
-  
+  console.log('Received request:', {
+    body: req.body,
+    headers: req.headers,
+    ip: req.ip,
+    timestamp: new Date().toISOString()
+});
+const { prompt, aeVersion = "After Effects" } = req.body;
+if (!prompt) {
+    console.log('Error: Prompt missing');
+    return res.status(400).json({ error: "Prompt is required" });
+}
     try {
       // 🔸 Use system prompt here:
       const chat = model.startChat({
         history: [],
         systemInstruction : {
             role: 'system',
-          parts: [{"text": `You are an expert in Adobe After Effects scripting. Generate only valid JavaScript ExtendScript code for 
+          parts: [{"text": `You are an expert in Adobe After Effects scripting. You can do anything you can trim portions of layers, you can create a new layer,etc. You just need to generate a script for all that.
+            Generate only valid JavaScript ExtendScript code for 
             After Effects, wrapped in an immediately invoked function expression (function() { ... })();. 
             Do not include explanations, comments, markdown, or code fences (e.g., \`\`\`javascript).
              Ensure the script is concise, functional, and checks for active composition (e.g., if (app.project.activeItem == null) 
              { alert("No active composition"); return; }).
              Target the selected layer or a specified layer by name/index, checking if a layer exists. Examples:
-             - "Create a null layer and make it parent of 8th layer": (function() { if (app.project.activeItem == null || !(app.project.activeItem instanceof CompItem)) { alert("No active composition"); return; } var comp = app.project.activeItem; if (comp.numLayers < 8) { alert("Composition must have at least 8 layers"); return; } var nullLayer = comp.layers.addNull(); var eighthLayer = comp.layer(8); eighthLayer.parent = nullLayer; })();
+            - "Create a null layer and make it parent of 8th layer": (function() { if (app.project.activeItem == null || !(app.project.activeItem instanceof CompItem)) { alert("No active composition"); return; } var comp = app.project.activeItem; if (comp.numLayers < 8) { alert("Composition must have at least 8 layers"); return; } var nullLayer = comp.layers.addNull(); var eighthLayer = comp.layer(8); eighthLayer.parent = nullLayer; })();
             - "Create a red solid layer named Background": (function() { if (app.project.activeItem == null) { alert("No active composition"); return; } app.project.activeItem.layers.addSolid([1,0,0], "Background", 1920, 1080, 1); })();
             - "Create an adjustment layer": (function() { if (app.project.activeItem == null) { alert("No active composition"); return; } var adjLayer = app.project.activeItem.layers.addSolid([1,1,1], "Adjustment Layer", app.project.activeItem.width, app.project.activeItem.height, 1); adjLayer.adjustmentLayer = true; })();
               For precompose commands, pass an array of layer indices (integers, e.g., [1, 2, 3]) to layers.precompose. 
@@ -42,9 +52,10 @@ const model = genAI.getGenerativeModel({
               (e.g., "ADBE Gaussian Blur 2" for Gaussian Blur). 
               For applying user presets, use layer.applyPreset with a File object. 
               Presets may be in:
-              - User Presets: "C:/Users/acer/Documents/Adobe/After Effects 2023/User Presets/" with subfolders (e.g., Zireael/, MyPresets/CCs/).
-              - Default Presets: "C:/Program Files/Adobe/Adobe After Effects 2023/Support Files/Presets/" with subfolders (e.g., Trapcode Tao/).
-              Use the exact preset name from the prompt, preserving spaces and capitalization, and append .ffx only if not included. Check if the preset file exists before applying. Target the selected layer, a named layer, or a newly created layer as specified. Map common effect names to internal names:
+              - User Presets: Folder.userData.fsName + "/Adobe/After Effects ${aeVersion}/User Presets/" with subfolders specified in the prompt (e.g., "Effects/Lo twixtor 1" for "User Presets/Effects/Lo twixtor 1.ffx").
+              - Default Presets: "C:/Program Files/Adobe/Adobe After Effects ${aeVersion}/Support Files/Presets/" with subfolders (e.g., "Trapcode Tao/Trapcode Tao.ffx").
+              Use the exact preset name from the prompt, preserving spaces and capitalization, and append .ffx only if not included. Check if the preset file exists before applying. Target the selected layer, a named layer, or a newly created layer as specified.
+              Map common effect names to internal names:
               - Blur, Gaussian Blur: ADBE Gaussian Blur 2
               - Drop Shadow: ADBE Drop Shadow
               - Hue/Saturation: ADBE Hue Saturation
