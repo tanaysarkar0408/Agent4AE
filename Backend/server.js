@@ -60,7 +60,66 @@ if (!prompt) {
               - Drop Shadow: ADBE Drop Shadow
               - Hue/Saturation: ADBE Hue Saturation
               Examples:
-              - "Create a text layer 'Resolutions.aep' with red color and blend mode to overlay": (function() { if (app.project.activeItem == null || !(app.project.activeItem instanceof CompItem)) { alert("No active composition"); return; } var comp = app.project.activeItem; var textLayer = comp.layers.addText("Resolutions.aep"); var textDoc = new TextDocument("Resolutions.aep"); textLayer.property("Source Text").setValue(textDoc); var textProps = textLayer.property("ADBE Text Properties"); if (!textProps) { alert("Error: Text properties not found"); textLayer.remove(); return; } var animatorGroup = textProps.property("ADBE Text Animators").addProperty("ADBE Text Animator"); if (!animatorGroup) { alert("Error: Failed to add text animator"); textLayer.remove(); return; } var selector = animatorGroup.property("ADBE Text Animator Properties").addProperty("ADBE Text Selector"); var fillColor = animatorGroup.property("ADBE Text Animator Properties").addProperty("ADBE Text Fill Color"); if (!fillColor) { alert("Error: Failed to add fill color property"); textLayer.remove(); return; } fillColor.setValue([1, 0, 0]); textLayer.blendMode = BlendMode.OVERLAY; })();
+              - "Create a text layer 'Hello' with red color and blend mode to overlay": (function() {
+      app.beginUndoGroup("Create Hello Text Layer and Set Blend Mode");
+
+  var comp = app.project.activeItem;
+
+  if (comp == null || !(comp instanceof CompItem)) {
+    alert("Please select a composition first.");
+    app.endUndoGroup();
+    return;
+  }
+
+  var sourceTextString = "hello";
+
+  var textLayer = comp.layers.addText(sourceTextString);
+
+  if (textLayer === null) {
+    alert("Failed to create text layer.");
+    app.endUndoGroup();
+    return;
+  }
+
+  textLayer.name = sourceTextString + " Overlay";
+
+  try {
+       textLayer.blendingMode = BlendingMode.OVERLAY;
+  } catch (e) {
+       alert("Error setting blend mode to Overlay: " + e.message + "\nEnsure the 'BlendingMode' enum is available in your After Effects version.");
+       app.endUndoGroup();
+       return;
+  }
+
+  try {
+      var textDocument = textLayer.property("ADBE Text Properties").property("ADBE Text Document");
+      var textProp = textDocument.value;
+      var textRect = textLayer.sourceRectAtTime(0, false);
+
+      var newAnchorPoint = [
+          textRect.left + textRect.width / 2,
+          textRect.top + textRect.height / 2
+      ];
+
+      var currentAnchorPoint = textLayer.anchorPoint.value;
+      var currentPosition = textLayer.position.value;
+
+      var newPosition = [
+           currentPosition[0] + (newAnchorPoint[0] - currentAnchorPoint[0]),
+           currentPosition[1] + (newAnchorPoint[1] - currentAnchorPoint[1])
+      ];
+
+      textLayer.anchorPoint.setValue(newAnchorPoint);
+      textLayer.position.setValue(newPosition);
+
+  } catch(e) {
+      $.writeln("Warning: Could not center text layer's anchor point. " + e.message);
+  }
+
+
+  app.endUndoGroup();
+
+})();
               - "Create a star shape layer of red color": (function() { if (!app.project.activeItem) { var comp = app.project.items.addComp("New Comp", 500, 500, 1, 30, 25); comp.openInViewer(); } var comp = app.project.activeItem; if (!(comp instanceof CompItem)) { alert("Error: No valid composition"); return; } var shapeLayer = comp.layers.addShape(); if (!shapeLayer) { alert("Error: Failed to create shape layer"); return; } shapeLayer.name = "Star Shape"; var shapeGroup = shapeLayer.property("Contents").addProperty("ADBE Vector Group"); if (!shapeGroup) { alert("Error: Failed to create shape group"); return; } shapeGroup.name = "Star"; var starContent = shapeGroup.property("Contents"); if (!starContent) { alert("Error: Shape group content not found"); return; } var polystar = starContent.addProperty("ADBE Vector Shape - Star"); if (!polystar) { alert("Error: Failed to add star shape"); return; } polystar.property("Points").setValue(5); polystar.property("Inner Radius").setValue(50); polystar.property("Outer Radius").setValue(100); var fill = starContent.addProperty("ADBE Vector Graphic - Fill"); if (!fill) { alert("Error: Failed to add fill"); return; } fill.property("ADBE Vector Fill Color").setValue([1, 0, 0]); fill.property("ADBE Vector Fill Opacity").setValue(100); })();
               - "Create a null layer and make it parent of 8th layer": (function() { if (!app.project.activeItem) { var comp = app.project.items.addComp("New Comp", 1920, 1080, 1, 30, 25); comp.openInViewer(); } var comp = app.project.activeItem; if (!(comp instanceof CompItem)) { alert("Error: No valid composition"); return; } if (comp.numLayers < 8) { alert("Error: Composition must have at least 8 layers"); return; } var nullLayer = comp.layers.addNull(); var eighthLayer = comp.layer(8); eighthLayer.parent = nullLayer; })();
               - "Create a red solid layer named Background": (function() { if (app.project.activeItem == null) { alert("No active composition"); return; } app.project.activeItem.layers.addSolid([1,0,0], "Background", 1920, 1080, 1); })();
