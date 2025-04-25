@@ -8,6 +8,8 @@ Agent4AE is a plugin designed to simplify scripting for Adobe After Effects by l
 - **Real-Time Execution**: Execute generated scripts directly in After Effects.
 - **User-Friendly Interface**: A React-based UI for entering prompts and viewing results.
 - **Predefined Examples**: Handles common After Effects tasks like creating layers, pre-composing, and animations.
+- **Dynamic Textarea**: Automatically adjusts the height of the input field based on the content.
+- **Preset Application**: Supports applying user presets to layers. Presets must be placed in the "User Presets" subfolder or the default presets folder.
 
 ## Project Structure
 
@@ -66,6 +68,13 @@ Agent4AE is a plugin designed to simplify scripting for Adobe After Effects by l
 3. Click "Generate & Run" to execute the script in After Effects.
 4. View the result or error feedback in the panel.
 
+### Preset Requirements
+
+- Presets must be placed in the "User Presets" subfolder or the default presets folder for After Effects.
+- Example paths:
+  - User Presets: `Documents/Adobe/After Effects/User Presets/<subfolder>/<preset>.ffx`
+  - Default Presets: `C:/Program Files/Adobe/Adobe After Effects/Support Files/Presets/<subfolder>/<preset>.ffx`
+
 ## Examples
 
 ### Create a Red Solid Layer
@@ -83,7 +92,7 @@ Pre-compose all layers and name it PrecomposeByAgent
 ### Create a Text Layer
 Prompt:
 ```
-Create a text layer with text Hello
+Create a text layer with text 'Hello'
 ```
 
 ## Development Notes
@@ -100,4 +109,4 @@ Create a text layer with text Hello
 
 ## License
 
-This project is licensed under TANAY SARKAR😉.
+This project is licensed under MIT .
