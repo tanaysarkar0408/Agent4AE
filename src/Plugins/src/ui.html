@@ -1,0 +1,377 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Agent4AE By Tanay Sarkar</title>
+    <script src="CSInterface.js"></script>
+    <script src="main.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        select, button {
+            padding: 5px;
+            font-size: 14px;
+        }
+        select {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            color: #333;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        select:hover {
+            border-color: #888;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #listenButton.listening {
+            background-color: #28a745; /* Green when listening */
+        }
+        #listenButton.listening:hover {
+            background-color: #218838;
+        }
+        #prompt {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 8px;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            width: 100%;
+            max-width: 500px;
+            min-height: 30px;
+            line-height: 1.4;
+            resize: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            box-sizing: border-box;
+            transition: height 0.3s ease;
+        }
+        #prompt:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        #prompt::placeholder {
+            color: #999;
+            line-height: 1.4;
+        }
+        #feedback {
+            background-color: #fff;
+            padding: 10px;
+            border: 1px solid #ccc;
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 12px;
+            color: #333;
+        }
+        #feedback.error {
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <select id="aeVersion">
+            <option value="After Effects">After Effects (Generic)</option>
+            <option value="2019">After Effects 2019</option>
+            <option value="2020">After Effects 2020</option>
+            <option value="2021">After Effects 2021</option>
+            <option value="2022">After Effects 2022</option>
+            <option value="2023" selected>After Effects 2023</option>
+            <option value="2024">After Effects 2024</option>
+        </select>
+        <textarea id="prompt" placeholder="e.g., Create an adjustment layer with preset Effects/Lo twixtor 1 (include subfolder)"></textarea>
+        <div style="display: flex; gap: 10px;">
+            <button id="listenButton" onclick="toggleSpeechRecognition()">Start Listening</button>
+            <button onclick="generateAndRunScript(document.getElementById('prompt').value, document.getElementById('aeVersion').value, true)">Execute</button>
+        </div>
+        <div id="feedback">Enter a prompt, press Ctrl+Enter to execute, or say "Hey Jarvis" followed by a command (Ctrl+L to toggle listening).</div>
+    </div>
+
+    <script>
+        // Dynamic textarea height adjustment
+        const textarea = document.getElementById('prompt');
+        const listenButton = document.getElementById('listenButton');
+        const feedback = document.getElementById('feedback');
+    
+        function adjustTextareaHeight() {
+            textarea.style.height = 'auto';
+            textarea.style.height = `${Math.max(textarea.scrollHeight, 30)}px`;
+        }
+
+        // Adjust height on input, focus, and load
+        textarea.addEventListener('input', adjustTextareaHeight);
+        textarea.addEventListener('focus', adjustTextareaHeight);
+`
+        // Execute script on Ctrl+Enter key press
+        textarea.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && event.ctrlKey) {
+                event.preventDefault();
+                generateAndRunScript(textarea.value, document.getElementById('aeVersion').value, true);
+            }
+        });
+
+        // Initial adjustment with slight delay to handle CEP rendering
+        window.addEventListener('load', () => {
+            setTimeout(adjustTextareaHeight, 100);
+        });
+
+
+        function toggleSpeechRecognition() {
+            if (!recognition) return;
+
+            if (isListening) {
+                stopSpeechRecognition();
+            } else {
+                startSpeechRecognition();
+            }
+        }
+
+        function startSpeechRecognition() {
+            fetch('http://localhost:3000/start').then(() => {
+    feedback.textContent = 'Started external voice listener.';
+});;
+            isListening = true;
+            listenButton.textContent = 'Stop Listening';
+            listenButton.classList.add('listening');
+            feedback.textContent = 'Listening for "Hey Jarvis"... (Ctrl+L to stop)';
+            feedback.classList.remove('error');
+        }
+
+        function stopSpeechRecognition() {
+            recognition.stop();
+            isListening = false;
+            listenButton.textContent = 'Start Listening';
+            listenButton.classList.remove('listening');
+            feedback.textContent = 'Enter a prompt, press Ctrl+Enter to execute, or say "Hey Jarvis" followed by a command (Ctrl+L to toggle listening).';
+            feedback.classList.remove('error');
+        }
+
+        // Keyboard shortcut for toggling speech recognition (Ctrl+L)
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'l' && event.ctrlKey) {
+                event.preventDefault(); // Prevent browser defaults (e.g., bookmark menu)
+                toggleSpeechRecognition();
+            }
+        });
+    </script>
+</body>
+</html>
+ -->
+
+
+ <!DOCTYPE html>
+<html>
+<head>
+    <title>Agent4AE By Tanay Sarkar</title>
+    <script src="CSInterface.js"></script>
+    <script src="main.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 10px; background-color: #f5f5f5; }
+        .container { display: flex; flex-direction: column; gap: 10px; }
+        select, button { padding: 5px; font-size: 14px; }
+        select {
+            border: 1px solid #ccc; border-radius: 5px; background-color: #fff; color: #333;
+            padding: 10px; font-size: 14px; cursor: pointer;
+        }
+        select:hover { border-color: #888; }
+        button {
+            background-color: #007bff; color: #fff; border: none; border-radius: 5px; cursor: pointer;
+        }
+        button:hover { background-color: #0056b3; }
+        #listenButton.listening { background-color: #28a745; }
+        #listenButton.listening:hover { background-color: #218838; }
+        #prompt {
+            border: 1px solid #ccc; border-radius: 5px; padding: 8px; font-size: 14px;
+            font-family: Arial, sans-serif; width: 100%; max-width: 500px; min-height: 30px;
+            line-height: 1.4; resize: none; white-space: pre-wrap; word-wrap: break-word;
+            box-sizing: border-box; transition: height 0.3s ease;
+        }
+        #prompt:focus { outline: none; border-color: #007bff; }
+        #prompt::placeholder { color: #999; line-height: 1.4; }
+        #feedback {
+            background-color: #fff; padding: 10px; border: 1px solid #ccc; max-height: 100px;
+            overflow-y: auto; font-size: 12px; color: #333;
+        }
+        #feedback.error { color: #d32f2f; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <select id="aeVersion">
+            <option value="After Effects">After Effects (Generic)</option>
+            <option value="2019">After Effects 2019</option>
+            <option value="2020">After Effects 2020</option>
+            <option value="2021">After Effects 2021</option>
+            <option value="2022">After Effects 2022</option>
+            <option value="2023" selected>After Effects 2023</option>
+            <option value="2024">After Effects 2024</option>
+        </select>
+        <textarea id="prompt" placeholder="e.g., Create an adjustment layer with preset Effects/Lo twixtor 1"></textarea>
+        <div style="display: flex; gap: 10px;">
+            <button id="listenButton">Start Recording</button>
+            <button onclick="generateAndRunScript(document.getElementById('prompt').value, document.getElementById('aeVersion').value, true)">Execute</button>
+        </div>
+        <div id="feedback">Enter a prompt, press Ctrl+Enter to execute, or click Start Recording (Ctrl+L to toggle).</div>
+    </div>
+    
+    <script>
+        const csInterface = new CSInterface();
+        const textarea = document.getElementById("prompt");
+        const listenButton = document.getElementById("listenButton");
+        const feedback = document.getElementById("feedback");
+        let isRecording = false;
+        let audioFilePath = null;
+
+        function adjustTextareaHeight() {
+            textarea.style.height = "auto";
+            textarea.style.height = `${Math.max(textarea.scrollHeight, 30)}px`;
+        }
+
+        textarea.addEventListener("input", adjustTextareaHeight);
+        textarea.addEventListener("focus", adjustTextareaHeight);
+        textarea.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && event.ctrlKey) {
+                event.preventDefault();
+                generateAndRunScript(textarea.value, document.getElementById("aeVersion").value, true);
+            }
+        });
+
+        window.addEventListener("load", () => setTimeout(adjustTextareaHeight, 100));
+
+        async function toggleRecording() {
+            if (isRecording) await stopRecording();
+            else await startRecording();
+        }
+
+        async function startRecording() {
+            try {
+                feedback.textContent = "Starting recording...";
+                feedback.classList.remove("error");
+                
+                csInterface.evalScript('startRecording()', (result) => {
+                    const response = JSON.parse(result);
+                    if (response.status === "error") {
+                        feedback.textContent = `Error: ${response.message}`;
+                        feedback.classList.add("error");
+                        return;
+                    }
+                    isRecording = true;
+                    audioFilePath = response.audioFilePath;
+                    listenButton.textContent = "Stop Recording";
+                    listenButton.classList.add("listening");
+                    feedback.textContent = "Recording... Click Stop Recording or press Ctrl+L.";
+                });
+            } catch (err) {
+                feedback.textContent = `Error: ${err.message}`;
+                feedback.classList.add("error");
+            }
+        }
+
+        async function stopRecording() {
+            try {
+                feedback.textContent = "Stopping recording...";
+                feedback.classList.remove("error");
+
+                csInterface.evalScript(`stopRecording("${audioFilePath.replace(/\\/g, "\\\\")}")`, async (result) => {
+                    const response = JSON.parse(result);
+                    if (response.status === "error") {
+                        feedback.textContent = `Error: ${response.message}`;
+                        feedback.classList.add("error");
+                        isRecording = false;
+                        listenButton.textContent = "Start Recording";
+                        listenButton.classList.remove("listening");
+                        return;
+                    }
+
+                    // Read audio file as base64
+                    csInterface.evalScript(`readAudioFile("${audioFilePath.replace(/\\/g, "\\\\")}")`, async (base64Data) => {
+                        if (base64Data.startsWith("Error")) {
+                            feedback.textContent = `Error: ${base64Data}`;
+                            feedback.classList.add("error");
+                            isRecording = false;
+                            listenButton.textContent = "Start Recording";
+                            listenButton.classList.remove("listening");
+                            return;
+                        }
+
+                        // Convert base64 to Blob
+                        const byteCharacters = atob(base64Data);
+                        const byteNumbers = new Array(byteCharacters.length);
+                        for (let i = 0; i < byteCharacters.length; i++) {
+                            byteNumbers[i] = byteCharacters.charCodeAt(i);
+                        }
+                        const byteArray = new Uint8Array(byteNumbers);
+                        const blob = new Blob([byteArray], { type: "audio/wav" });
+
+                        // Upload to server
+                        const formData = new FormData();
+                        formData.append("audio", blob, "recording.wav");
+
+                        const uploadResponse = await fetch("http://localhost:3000/transcribe-file", {
+                            method: "POST",
+                            body: formData
+                        });
+                        const data = await uploadResponse.json();
+                        if (data.error) {
+                            feedback.textContent = `Error: ${data.error}`;
+                            feedback.classList.add("error");
+                            return;
+                        }
+
+                        isRecording = false;
+                        listenButton.textContent = "Start Recording";
+                        listenButton.classList.remove("listening");
+                        feedback.textContent = "Transcription complete.";
+                        feedback.classList.remove("error");
+
+                        const transcript = data.transcript;
+                        textarea.value = transcript;
+                        adjustTextareaHeight();
+                        if (transcript.toLowerCase().startsWith("hey jarvis")) {
+                            const command = transcript.slice(10).trim();
+                            if (command) {
+                                generateAndRunScript(command, document.getElementById("aeVersion").value, true);
+                            }
+                        }
+                    });
+                });
+            } catch (err) {
+                feedback.textContent = `Error: ${err.message}`;
+                feedback.classList.add("error");
+                isRecording = false;
+                listenButton.textContent = "Start Recording";
+                listenButton.classList.remove("listening");
+            }
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "l" && event.ctrlKey) {
+                event.preventDefault();
+                toggleRecording();
+            }
+        });
+
+        listenButton.addEventListener("click", toggleRecording);
+    </script>
+</body>
+</html>

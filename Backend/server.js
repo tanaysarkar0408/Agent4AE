@@ -5,7 +5,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 require("dotenv").config();
 
 const app = express();
-app.use(cors({ origin: '*', methods: ['POST'], allowedHeaders: ['Content-Type', 'Origin', 'Accept'] }));
+app.use(cors({ origin: '*', methods: ['GET','POST'], allowedHeaders: ['Content-Type', 'Origin', 'Accept'] }));
 app.use(bodyParser.json());
 const PORT = process.env.PORT || 3000;
 
@@ -60,6 +60,53 @@ if (!prompt) {
               - Drop Shadow: ADBE Drop Shadow
               - Hue/Saturation: ADBE Hue Saturation
               Examples:
+              - "Create a start shaped mask on this layer" : (function() {
+  if (!app.project) {
+    alert("Error: No project is open");
+    return;
+  }
+  if (!app.project.activeItem || !(app.project.activeItem instanceof CompItem)) {
+    alert("Error: No valid composition");
+    return;
+  }
+  var comp = app.project.activeItem;
+  if (comp.selectedLayers.length === 0) {
+    alert("Error: No layer selected");
+    return;
+  }
+  var selectedLayer = comp.selectedLayers[0];
+  var mask = selectedLayer.property("Masks").addProperty("Mask");
+  if (!mask) {
+    alert("Error: Failed to create mask");
+    return;
+  }
+  var maskPath = mask.property("ADBE Mask Shape");
+  if (!maskPath) {
+    alert("Error: Mask Shape property not found");
+    return;
+  }
+  var starPoints = 5;
+  var innerRadius = 50;
+  var outerRadius = 100;
+  var center = [comp.width / 2, comp.height / 2];
+  var maskVertices = [];
+  for (var i = 0; i < starPoints * 2; i++) {
+    var angle = Math.PI / starPoints * i - Math.PI / 2;
+    var radius = (i % 2 === 0) ? outerRadius : innerRadius;
+    var x = center[0] + radius * Math.cos(angle);
+    var y = center[1] + radius * Math.sin(angle);
+    maskVertices.push([x, y]);
+  }
+  try {
+    var shape = new Shape();
+    shape.vertices = maskVertices;
+    shape.closed = true;
+    maskPath.setValue(shape);
+  } catch (e) {
+    alert("Error: Failed to set mask shape");
+    return;
+  }
+})();
               - "Create a text layer 'Hello' with red color and blend mode to overlay": (function() {
       app.beginUndoGroup("Create Hello Text Layer and Set Blend Mode");
 

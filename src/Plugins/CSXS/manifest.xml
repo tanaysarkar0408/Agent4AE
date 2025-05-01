@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionManifest Version="11.0" ExtensionBundleId="com.tanay.agent4ae" ExtensionBundleVersion="1.0.0" ExtensionBundleName="Agent4AE">
+    <ExtensionList>
+        <Extension Id="com.tanay.agent4ae.panel" Version="1.0.0"/>
+    </ExtensionList>
+    <ExecutionEnvironment>
+        <HostList>
+            <Host Name="AEFT" Version="[17.0,24.0]"/> <!-- Supports AE 2020 (17.0) to 2024 (24.0) -->
+        </HostList>
+        <LocaleList>
+            <Locale Code="All"/>
+        </LocaleList>
+        <RequiredRuntimeList>
+            <RequiredRuntime Name="CSXS" Version="11.0"/>
+        </RequiredRuntimeList>
+    </ExecutionEnvironment>
+    <DispatchInfoList>
+        <Extension Id="com.tanay.agent4ae.panel">
+            <DispatchInfo>
+                <Resources>
+                    <MainPath>./src/ui.html</MainPath>
+                    <ScriptPath>./host/main.jsx</ScriptPath>
+                    <NetworkAccess Allows="true"/>
+                </Resources>
+                <Lifecycle>
+                    <AutoVisible>true</AutoVisible>
+                </Lifecycle>
+                <UI>
+                    <Type>Panel</Type>
+                    <Menu>Agent4AE</Menu>
+                    <Geometry>
+                        <Size>
+                            <Height>400</Height>
+                            <Width>300</Width>
+                        </Size>
+                    </Geometry>
+                </UI>
+                <RequiredPermissions>
+                    <Network>true</Network>
+                    <ExecuteScript>true</ExecuteScript>
+                    <Media>true</Media> <!-- Add this line -->
+                </RequiredPermissions>
+            </DispatchInfo>
+        </Extension>
+    </DispatchInfoList>
+</ExtensionManifest>
+
+
+<!-- <?xml version="1.0" encoding="UTF-8"?>
+<ExtensionManifest Version="10.0" ExtensionBundleId="com.PLUGINS.aeplugin" ExtensionBundleVersion="1.0.0"
+    ExtensionBundleName="AE Script Generator" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ExtensionList>
+        <Extension Id="com.PLUGINS.aeplugin.panel" Version="1.0.0" />
+    </ExtensionList>
+    <ExecutionEnvironment>
+        <HostList>
+            <Host Name="AEFT" Version="[17.0,99.9]" />
+        </HostList>
+        <LocaleList>
+            <Locale Code="All" />
+        </LocaleList>
+        <RequiredRuntimeList>
+            <RequiredRuntime Name="CSXS" Version="10.0" />
+        </RequiredRuntimeList>
+    </ExecutionEnvironment>
+    <DispatchInfoList>
+        <Extension Id="com.PLUGINS.aeplugin.panel">
+            <DispatchInfo>
+                <Resources>
+                    <MainPath>./src/ui.html</MainPath>
+                    <ScriptPath>./host/main.jsx</ScriptPath>
+                </Resources>
+                <UI>
+                    <Type>Panel</Type>
+                    <Menu>Agent4AE By Tanay Sarkar</Menu>
+                    <Geometry>
+                        <Size>
+                            <Height>400</Height>
+                            <Width>300</Width>
+                        </Size>
+                    </Geometry>
+                </UI>
+            </DispatchInfo>
+        </Extension>
+    </DispatchInfoList>
+</ExtensionManifest> -->
